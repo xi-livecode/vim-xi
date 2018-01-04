@@ -18,15 +18,40 @@ This plugin communicate with Xi REPL asynchronously, so you need either Vim
 
 ## Install ##
 
-...
+Install the plugin manually on your `~/.vim` (or `~/.local/share/nvim` if using
+Neovim) or with a plugin manager, like
+[vim-plug](https://github.com/junegunn/vim-plug):
+
+```
+Plug 'xi-livecode/vim-xi'
+```
+
+For now you need to configure your REPL path.
+Run first on your terminal:
+
+```
+$ whereis xi
+xi: /usr/local/bin/xi
+```
+
+And define on your `.vimrc`:
+
+```
+let g:xi_repl = '/usr/local/bin/xi'
+```
 
 ## Usage ##
 
-...
+### Bindings ###
+
+* `<localleader>b`: Start Xi REPL
+* `<localleader>q`: Stop Xi REPL
+* `<localleader>ee` or `<c-e>`: Evaluate paragraph
+* `<localleader>h` or `<c-h>`: Silence all streams (hush)
 
 ## Configure ##
 
-...
+*to-do*
 
 ## Contributing
 
