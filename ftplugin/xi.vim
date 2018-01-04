@@ -1,20 +1,7 @@
-" FIXME Add check for neovim support
-"if !has('channel') || !has('job')
-"  echoerr "+channel or +job features are missing! vim-xi won't work here :("
-"endif
-
 """ Global variables
 
 if !exists("g:xi_repl")
-  " In case of using a symlink but resources are in the same directory as the
-  " actual script, do this:
-  " 1. Get the absolute path of the script
-  " 2. Resolve all symbolic links
-  " 3. Get the folder of the resolved absolute file
-  let s:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-  let s:bin_path = resolve(expand(s:path . "/../bin"))
-
-  let g:xi_repl = get(g:, 'xi_repl', s:bin_path . "/xi")
+  let g:xi_repl = get(g:, 'xi_repl', '/usr/bin/xi')
 endif
 
 if !exists("g:xi_preserve_curpos")

@@ -37,7 +37,7 @@ endfunction
 
 " Check if line is commented out
 function! s:IsComment(line)
-  return (match(a:line, "^[ \t]*--.*") >= 0)
+  return (match(a:line, "^[ \t]*#.*") >= 0)
 endfunction
 
 " Remove commented out lines
@@ -54,24 +54,6 @@ function! s:RemoveLineComments(lines)
   return l:ret
 endfunction
 
-" Remove block comments
-function! s:RemoveBlockComments(text)
-  return substitute(a:text, "{-.*-}", "", "g")
-endfunction
-
-" Wrap in :{ :} if there's more than one line
-function! s:WrapIfMulti(lines)
-  if len(a:lines) > 1
-    return [":{"] + a:lines + [":}"]
-  else
-    return a:lines
-  endif
-endfunction
-
-function! s:AddCyclePosDefs(lines)
-  return s:cycle_position_defs + a:lines
-endfunction
-
 " Change string into array of lines
 function! s:Lines(text)
   return split(a:text, "\n")
@@ -83,11 +65,8 @@ function! s:Unlines(lines)
 endfunction
 
 function! s:EscapeText(text)
-  let l:text  = s:RemoveBlockComments(a:text)
-  let l:lines = s:Lines(s:TabToSpaces(l:text))
+  let l:lines = s:Lines(s:TabToSpaces(a:text))
   let l:lines = s:RemoveLineComments(l:lines)
-  let l:lines = s:WrapIfMulti(l:lines)
-  let l:lines = s:AddCyclePosDefs(l:lines)
   let l:result  = s:Unlines(l:lines)
   echom l:result
 
@@ -110,13 +89,12 @@ let g:xi_out_buffer = []
 
 function! xi#plugin#OutHandler(_job_id, data, event) dict
   " Do nothing
+  "echom join(a:data, "\n")
 endfunction
 
 function! xi#plugin#ErrHandler(_job_id, data, event)
   echohl ErrorMsg
-  for line in a:data
-    echo line
-  endfor
+  echom join(a:data, "\n")
   echohl None
 endfunction
 
@@ -128,10 +106,13 @@ function! xi#plugin#Start()
       \'on_stdout': function('xi#plugin#OutHandler'),
       \'on_stderr': function('xi#plugin#ErrHandler'),
     \})
-    if g:xi_job > 0
-      echom 'Xi started.'
+    if g:xi_job == -2
+      echoerr "No support for async jobs. Cannot start Xi :("
+    elseif g:xi_job > 0
+      echom 'Xi started'
     else
-      echom 'Xi failed to start.'
+      echom 'Xi failed to start'
+      unlet g:xi_job
     endif
   endif
 endfunction
@@ -140,9 +121,9 @@ function! xi#plugin#Stop()
   if exists("g:xi_job")
     call xi#job#stop(g:xi_job)
     unlet g:xi_job
-    echom "Xi stopped."
+    echom "Xi stopped"
   else
-    echo "Xi is not running."
+    echo "Xi is not running"
   endif
 endfunction
 
@@ -187,27 +168,10 @@ function! xi#plugin#EvalSelection() range
   call xi#plugin#Eval(l:content)
 endfunction
 
-function! xi#plugin#Silence(n)
-  if exists("g:xi_job")
-    call xi#plugin#EvalSimple("d" . a:n . " silence")
-  else
-    echo "Xi is not running."
-  endif
-endfunction
-
-function! xi#plugin#Play(n)
-  let res = search('^\s*d' . a:n)
-  if res > 0
-    call xi#plugin#EvalParagraph()
-  else
-    echo "d" . a:stream . " was not found"
-  endif
-endfunction
-
 function! xi#plugin#Hush()
   if exists("g:xi_job")
     call xi#plugin#EvalSimple("hush")
   else
-    echo "Xi is not running."
+    echo "Xi is not running"
   endif
 endfunction
